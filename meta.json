@@ -48,5 +48,6 @@
             "title":"Media ID"
         }
     ],
+    "icon": "instagram",
     "title": "Instagram Get Recently Tagged" /* Required.A display name for the module */
 }
