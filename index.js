@@ -1,21 +1,21 @@
-var _ = require('lodash');
-var ig = require('instagram-node').instagram();
+var _ = require('lodash'),
+    util = require('./util.js'),
+    instagram = require('instagram-node').instagram();
 
-var globalPickResult = {
-    data: {
-        fields: {
-            'id': 'id',
-            'user.username': 'username',
-            'user.full_name': 'full_name',
-            'tags': 'tags',
-            'location': 'location',
-            'link': 'link',
-            'images.standard_resolution.url': 'media',
-            'caption.text': 'caption',
-            'likes.count': 'likes'
-        }
-    }
-};
+var pickInputs = {
+        'tag': { key: 'tag', validate: { req: true } }
+    },
+    pickOutputs = {
+        'id': { key: 'data', fields: ['id']},
+        'username': { key: 'data', fields: ['user.username']},
+        'full_name': { key: 'data', fields: ['user.full_name']},
+        'tags': { key: 'data', fields: ['tags']},
+        'location': { key: 'data', fields: ['location']},
+        'link': { key: 'data', fields: ['link']},
+        'media': { key: 'data', fields: ['images.standard_resolution.url']},
+        'caption': { key: 'data', fields: ['caption.text']},
+        'likes': { key: 'data', fields: ['likes.count']}
+    };
 
 module.exports = {
 
@@ -109,26 +109,18 @@ module.exports = {
      * @param {AppData} dexter Container for all data used in this workflow.
      */
     run: function(step, dexter) {
+        var credentials = dexter.provider('instagram').credentials(),
+            inputs = util.pickInputs(step, pickInputs),
+            validateErrors = util.checkValidateErrors(inputs, pickInputs);
 
-        var tag = step.input('tag').first();
+        // check params.
+        if (validateErrors)
+            return this.fail(validateErrors);
 
-        if (!tag) {
+        instagram.use({ access_token: _.get(credentials, 'access_token') });
+        instagram.tag_media_recent(inputs.tag, function (error, result) {
 
-            this.fail('A [tag] is Required.');
-        } else {
-
-            this.authParams(dexter);
-
-            ig.tag_media_recent(tag, function (err, result) {
-
-                if (err) {
-
-                    this.fail(err);
-                } else {
-
-                    this.complete(this.pickResult({data: result}, globalPickResult));
-                }
-            }.bind(this));
-        }
+            error? this.fail(error) : this.complete(util.pickOutputs({ data: result }, pickOutputs));
+        }.bind(this));
     }
 };

@@ -2,15 +2,17 @@
  * Metadata describing the module operation
  */
 {
-    //Required. Inputs the module expects.
     "inputs": [
         {
             "id": "tag",
             "title":"Tag"
         }
     ],
-    //Required. Outputs the module emits.
     "outputs": [
+        {
+            "id": "id",
+            "title":"Media ID"
+        },
         {
             "id": "username",
             "title":"Username"
@@ -42,12 +44,12 @@
         {
             "id": "link",
             "title":"URL"
-        },
-        {
-            "id": "id",
-            "title":"Media ID"
         }
     ],
+    "providers": [{
+        "name": "instagram",
+        "scopes": [ "basic", "public_content" ]
+    }],
     "icon": "instagram",
-    "title": "Instagram Get Recently Tagged" /* Required.A display name for the module */
+    "title": "Instagram Get Recently Tagged"
 }
